@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ func readCSV(url string) ([][]string, error) {
 	return data, nil
 }
 
-func getDataset() (dataset [][]string){
+func getDataset() (dataset [][]float64){
 	urlDataSet := "https://github.com/diananr/cai-project/raw/master/dataset/casos_cai_2019.csv"
 
 	data, err := readCSV(urlDataSet)
@@ -36,26 +37,22 @@ func getDataset() (dataset [][]string){
 		panic(err)
 	}
 
-	datasetDataCustom := [][]string{}
+	datasetDataCustom := [][]float64{}
 	for idx, row := range data {
 		if idx == 0 {
 			continue
 		}
 
 		rowFloat := strings.Split(row[0], ",")
-		elementRow := []string{}
+		elementRow := []float64{}
 
 		for _, element := range rowFloat {
-			elementRow = append(elementRow, element)
+			valueFloat, _ := strconv.ParseFloat(element, 64)
+			elementRow = append(elementRow, valueFloat)
 		}
 
-		fmt.Println("row =>=>=>=>", elementRow)
 		datasetDataCustom = append(datasetDataCustom, elementRow)
 	}
 
 	return datasetDataCustom;
-}
-
-func main() {
-	getDataset()
 }
