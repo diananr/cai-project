@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,6 +18,10 @@ type Row struct {
 	Addiction float64  `json:"addiction"`
 	Risk   		float64  `json:"risk"`
 	Month  	 	float64  `json:"month"`
+}
+
+type PredictionType struct {
+	Violence float64
 }
 
 
@@ -39,16 +42,31 @@ func makePrediction(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		rowToTest :=  mainDataset[3]
+		rowToTest := []float64{
+			rowBody.CAI,
+			rowBody.Age,
+			rowBody.Work,
+			rowBody.Link,
+			rowBody.Alcohol,
+			rowBody.Smoke,
+			rowBody.Drugs,
+			rowBody.Addiction,
+			rowBody.Risk,
+			rowBody.Month,
+		}
 		predictionResponse := predictClassification(mainDataset, rowToTest, 5)
-		fmt.Println("predictionResponse =>", predictionResponse)
 
+		prediction := PredictionType{Violence: predictionResponse}
+		predictionJson, err := json.Marshal(prediction)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		res.Header().Set("Content-Type", "application/json")
+		res.Write(predictionJson)
 	} else {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
 	}
-
-	res.Header().Set("Content-Type", "application/json")
-
 }
 
 func handleRequest() {
