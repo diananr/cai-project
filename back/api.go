@@ -27,7 +27,14 @@ type PredictionType struct {
 
 var mainDataset [][]float64
 
+func enableCors(res *http.ResponseWriter) {
+	(*res).Header().Set("Access-Control-Allow-Origin", "*")
+	(*res).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*res).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
+
 func makePrediction(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	if req.Method == "POST" {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -63,6 +70,7 @@ func makePrediction(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(http.StatusOK)
 		res.Write(predictionJson)
 	} else {
 		http.Error(res, "Invalid request method", http.StatusMethodNotAllowed)
